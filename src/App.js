@@ -1,9 +1,16 @@
-import './App.css'
+import { useEffect } from "react";
+import Board from "./components/Board";
+import Keyboard from "./components/Keyboard";
 
 function App() {
+  useEffect(()=>{
+
+  }, [])
   return (
-    <div className="App">
-      <h1>Wordle</h1>
+    <div className="App"><nav>
+      <h1>Wordle</h1></nav>
+      <Board />
+      <Keyboard />
     </div>
   );
 }
