@@ -1,8 +1,8 @@
 import React from 'react'
 // rfce
-const Keyboard = () =>{
+const Keyboard = () => {
   return (
-    <div>Keyboard</div>
+    <div className="keyboard"></div>
   )
 }
 
