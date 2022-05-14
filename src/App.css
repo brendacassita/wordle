@@ -1,8 +1,8 @@
 .App {
   text-align: center;
   background-color: #121212;
-  width: 100%;
-  height: 100%;
+  width: 100vw;
+  height: 100vh;
   /* display: flex; */
   color: white;
 }
@@ -65,11 +65,11 @@ nav h1 {
 }
 
 #correct {
-  background-color: #55f64a;
+  background-color: #528d4e;
 }
 
 #almost {
-  background-color: #edd769;
+  background-color: #b49f39;
 }
 
 #error {
@@ -78,7 +78,7 @@ nav h1 {
 
 .keyboard {
   width: 700px;
-  height: 00px;
+  height: 300px;
   margin-top: 60px;
 }
 

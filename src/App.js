@@ -1,69 +1,101 @@
-import { useState, createContext } from "react";
+import "./App.css";
 import Board from "./components/Board";
 import Keyboard from "./components/Keyboard";
-import "./App.css"
-import { boardDefault } from "./components/Words";
+import { boardDefault, generateWordSet } from "./Words";
+import React, { useState, createContext, useEffect } from "react";
+import GameOver from "./components/GameOver";
 
-
-export const AppContext = createContext()
+export const AppContext = createContext();
 
 function App() {
-  const [board,setBoard] = useState(boardDefault)
-  const [currentAttempt, setCurrentAttempt] = useState({attempt:0, letterPos:0})
+  const [board, setBoard] = useState(boardDefault);
+  const [currAttempt, setCurrAttempt] = useState({ attempt: 0, letter: 0 });
+  const [wordSet, setWordSet] = useState(new Set());
+  const [correctWord, setCorrectWord] = useState("");
+  const [disabledLetters, setDisabledLetters] = useState([]);
+  const [gameOver, setGameOver] = useState({
+    gameOver: false,
+    guessedWord: false,
+  });
+
+  useEffect(() => {
+    generateWordSet().then((words) => {
+      console.log(words)
+      setWordSet(words.wordSet);
+      setCorrectWord(words.todaysWord);
+    });
+  }, []);
+
+  const onEnter = () => {
+    if (currAttempt.letter !== 5) return;
+
+    let currWord = "";
+    for (let i = 0; i < 5; i++) {
+      currWord += board[currAttempt.attempt][i];
+    }
+    if (wordSet.has(currWord.toLowerCase())) {
+      setCurrAttempt({ attempt: currAttempt.attempt + 1, letter: 0 });
+    } else {
+      alert("Word not found");
+    }
+
+    if (currWord === correctWord) {
+      setGameOver({ gameOver: true, guessedWord: true });
+      return;
+    }
+    console.log(currAttempt);
+    if (currAttempt.attempt === 5) {
+      setGameOver({ gameOver: true, guessedWord: false });
+      return;
+    }
+  };
+
+  const onDelete = () => {
+    if (currAttempt.letter === 0) return;
+    const newBoard = [...board];
+    newBoard[currAttempt.attempt][currAttempt.letter - 1] = "";
+    setBoard(newBoard);
+    setCurrAttempt({ ...currAttempt, letter: currAttempt.letter - 1 });
+  };
+
+  const onSelectLetter = (key) => {
+    if (currAttempt.letter > 4) return;
+    const newBoard = [...board];
+    newBoard[currAttempt.attempt][currAttempt.letter] = key;
+    setBoard(newBoard);
+    setCurrAttempt({
+      attempt: currAttempt.attempt,
+      letter: currAttempt.letter + 1,
+    });
+  };
 
   return (
-    <div className="App"><nav>
-      <h2>Wordle</h2></nav>
-
-      {/* board and keyboard will have access to state 
-      that we pass it to since wrapping it */}
-      <AppContext.Provider value={{board, setBoard, currentAttempt, setCurrentAttempt}}>
+    <div className="App">
+      <nav>
+        <h1>Wordle</h1>
+      </nav>
+      <AppContext.Provider
+        value={{
+          board,
+          setBoard,
+          currAttempt,
+          setCurrAttempt,
+          correctWord,
+          onSelectLetter,
+          onDelete,
+          onEnter,
+          setDisabledLetters,
+          disabledLetters,
+          gameOver,
+        }}
+      >
         <div className="game">
-      <Board />
-      <Keyboard /></div>
+          <Board />
+          {gameOver.gameOver ? <GameOver /> : <Keyboard />}
+        </div>
       </AppContext.Provider>
     </div>
   );
 }
 
-export default App
-
-/* 
-
-data we need to track:
-  -- solution
-    -- 5 letter string, e.g. 'drain'
-  -- past guesses
-    -- an array of past guesses
-    -- each past guess is an array of letter objects [{}, {}, {}, {}, {}]
-    -- each object represents a letter in the guess word {letter: 'a', color: 'yellow'}
-  -- current guess
-    -- string 'hello'
-  -- keypad letters
-    -- array of letter objects [{key: 'a', color: 'green'}, {}, {} ...]
-  -- number of turns
-    -- an integer 0 - 6
-
-game process:
-  -- entering words:
-    -- user enters a letter & a square is filled with that letter
-    -- when a user hits delete it deletes the previous letter
-    -- when a user hits enter it submits the word
-      -- if all squares are not filled with letters then the word is not submitted
-      -- if that word has already been used in a prev guess then the word is not submitted
-  -- checking submitted words:
-    -- each letter is checked to see if it matches to the solution
-    -- each letter is assigned a color based on it's inclusion in the solution
-      -- exact matches (correct position in the solution) are green
-      -- partial matches (in the solution but not the correct position) are yellow
-      -- none-matches (not in the solution at all) are grey
-    -- the guess is added the grid with the correct colors
-    -- the current guess moves to the next row
-    -- the keypad letters are updated (colors)
-  -- ending the game:
-    -- when the guessed word fully matches the solution
-      -- modal to say 'well done'
-    -- when the user runs out of guesses
-      -- modal to say 'unlucky'
-
-*/
+export default App;
